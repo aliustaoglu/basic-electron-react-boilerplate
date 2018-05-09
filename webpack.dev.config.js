@@ -21,8 +21,33 @@ module.exports = {
     rules: [
       {
         test: /\.css$/,
-        use: [{ loader: 'style-loader' }, { loader: 'css-loader' }],
-        include: defaultInclude
+        use: ['style-loader', 'css-loader']
+      },
+      {
+        test: /\.less$/,
+        use: [
+          { loader: 'style-loader' },
+          { loader: 'css-loader' },
+          {
+            loader: 'less-loader',
+            options: {
+              javascriptEnabled: true
+            }
+          }
+        ]
+      },
+      {
+        test: /\.scss$/,
+        issuer: {
+          exclude: /\.less$/
+        }
+      },
+      {
+        test: /\.scss$/,
+        issuer: /\.less$/,
+        use: {
+          loader: './sassVarsToLess.js'
+        }
       },
       {
         test: /\.jsx?$/,
@@ -57,13 +82,9 @@ module.exports = {
       children: false
     },
     setup() {
-      spawn(
-        'electron',
-        ['.'],
-        { shell: true, env: process.env, stdio: 'inherit' }
-      )
-      .on('close', code => process.exit(0))
-      .on('error', spawnError => console.error(spawnError));
+      spawn('electron', ['.'], { shell: true, env: process.env, stdio: 'inherit' })
+        .on('close', code => process.exit(0))
+        .on('error', spawnError => console.error(spawnError));
     }
   }
 };
